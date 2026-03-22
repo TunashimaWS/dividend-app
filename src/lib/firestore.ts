@@ -5,6 +5,7 @@ import {
   addDoc,
   updateDoc,
   deleteDoc,
+  setDoc,
   query,
   orderBy,
 } from 'firebase/firestore'
@@ -46,6 +47,20 @@ export async function updateDocument<T extends object>(
     ...data,
     updatedAt: new Date().toISOString(),
   })
+}
+
+// 指定IDのドキュメントを上書き保存（スナップショットのupsertに使用）
+export async function setDocument<T extends object>(
+  userId: string,
+  collectionName: string,
+  docId: string,
+  data: T,
+): Promise<void> {
+  await setDoc(
+    doc(db, 'users', userId, collectionName, docId),
+    { ...data, updatedAt: new Date().toISOString() },
+    { merge: true },
+  )
 }
 
 export async function deleteDocument(

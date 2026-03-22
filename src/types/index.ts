@@ -81,6 +81,13 @@ export interface StockPnL {
   annualDividendJPY?: number  // 過去12ヶ月の受取配当合計（円）
 }
 
+// 資産推移スナップショット（1日1件、Firestore ID = YYYY-MM-DD）
+export interface PortfolioSnapshot {
+  date: string          // YYYY-MM-DD
+  totalValueJPY: number
+  updatedAt: string
+}
+
 // ポートフォリオサマリー
 export interface PortfolioSummary {
   totalValueJPY: number

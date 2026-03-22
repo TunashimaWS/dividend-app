@@ -1,5 +1,5 @@
 import { initializeApp } from 'firebase/app'
-import { getAuth } from 'firebase/auth'
+import { initializeAuth, browserLocalPersistence } from 'firebase/auth'
 import { getFirestore } from 'firebase/firestore'
 
 const firebaseConfig = {
@@ -12,5 +12,6 @@ const firebaseConfig = {
 }
 
 const app = initializeApp(firebaseConfig)
-export const auth = getAuth(app)
+// iOS Safari / PWA 対応: browserLocalPersistence を明示して iframe ベースの永続化を避ける
+export const auth = initializeAuth(app, { persistence: browserLocalPersistence })
 export const db = getFirestore(app)

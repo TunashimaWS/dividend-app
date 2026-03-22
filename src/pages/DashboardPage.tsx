@@ -3,27 +3,32 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { useStocks } from '@/hooks/useStocks'
 import { useDividends } from '@/hooks/useDividends'
+import { usePortfolioHistory } from '@/hooks/usePortfolioHistory'
 import { getUsdJpyRate } from '@/api/exchangeRate'
 import { fetchAllStockPrices } from '@/api/stockPrice'
 import { formatJPY, formatPercent, pnlColorClass } from '@/lib/utils'
 import PnLBarChart from '@/components/charts/PnLBarChart'
 import AllocationPieChart from '@/components/charts/AllocationPieChart'
+import PortfolioHistoryChart from '@/components/charts/PortfolioHistoryChart'
 import BottomNav from '@/components/layout/BottomNav'
 import PageHeader from '@/components/layout/PageHeader'
-import type { StockPnL } from '@/types'
+import type { PortfolioSnapshot, StockPnL } from '@/types'
 
 export default function DashboardPage() {
   const { stocks, loadStocks, editStock } = useStocks()
   const { dividends, loadDividends } = useDividends()
+  const { saveSnapshot, loadSnapshots } = usePortfolioHistory()
   const [usdJpy, setUsdJpy] = useState(150)
+  const [snapshots, setSnapshots] = useState<PortfolioSnapshot[]>([])
 
   useEffect(() => {
     loadStocks()
     loadDividends()
     getUsdJpyRate().then(setUsdJpy)
-  }, [loadStocks, loadDividends])
+    loadSnapshots().then(setSnapshots)
+  }, [loadStocks, loadDividends, loadSnapshots])
 
-  // Fetch prices after stocks load
+  // 株価取得後にスナップショットを保存
   useEffect(() => {
     if (stocks.length === 0) return
     fetchAllStockPrices(stocks).then((prices) => {
@@ -34,6 +39,13 @@ export default function DashboardPage() {
           editStock(stock.id, { currentPrice: price })
         }
       })
+      // 更新後の価格で今日の資産総額を計算してスナップショット保存
+      const total = stocks.reduce((sum, stock) => {
+        const price = prices[stock.code] ?? stock.currentPrice
+        const rate = stock.currency === 'USD' ? usdJpy : 1
+        return sum + price * stock.shares * rate
+      }, 0)
+      saveSnapshot(total)
     })
   }, [stocks.length]) // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -83,6 +95,16 @@ export default function DashboardPage() {
             <p className="text-xs text-muted-foreground mt-2">
               USD/JPY: {usdJpy.toFixed(2)} · {stocks.length}銘柄
             </p>
+          </CardContent>
+        </Card>
+
+        {/* 資産推移グラフ */}
+        <Card>
+          <CardHeader className="pb-0">
+            <CardTitle className="text-base">資産推移</CardTitle>
+          </CardHeader>
+          <CardContent className="pt-3">
+            <PortfolioHistoryChart snapshots={snapshots} />
           </CardContent>
         </Card>
 
