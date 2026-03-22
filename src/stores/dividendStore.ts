@@ -8,6 +8,7 @@ interface DividendState {
   setForecasts: (f: DividendForecast[]) => void
   addDividend: (d: Dividend) => void
   removeDividend: (id: string) => void
+  updateDividend: (id: string, data: Partial<Dividend>) => void
 }
 
 export const useDividendStore = create<DividendState>((set) => ({
@@ -17,4 +18,8 @@ export const useDividendStore = create<DividendState>((set) => ({
   setForecasts: (forecasts) => set({ forecasts }),
   addDividend: (d) => set((s) => ({ dividends: [d, ...s.dividends] })),
   removeDividend: (id) => set((s) => ({ dividends: s.dividends.filter((d) => d.id !== id) })),
+  updateDividend: (id, data) =>
+    set((s) => ({
+      dividends: s.dividends.map((d) => (d.id === id ? { ...d, ...data } : d)),
+    })),
 }))
