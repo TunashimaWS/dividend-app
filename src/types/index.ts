@@ -78,6 +78,7 @@ export interface StockPnL {
   costBasisJPY: number
   pnlJPY: number
   pnlPercent: number
+  annualDividendJPY?: number  // 過去12ヶ月の受取配当合計（円）
 }
 
 // ポートフォリオサマリー

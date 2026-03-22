@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { useStocks } from '@/hooks/useStocks'
+import { useDividends } from '@/hooks/useDividends'
 import { getUsdJpyRate } from '@/api/exchangeRate'
 import { fetchAllStockPrices } from '@/api/stockPrice'
 import { formatJPY, formatPercent, pnlColorClass } from '@/lib/utils'
@@ -13,12 +14,14 @@ import type { StockPnL } from '@/types'
 
 export default function DashboardPage() {
   const { stocks, loadStocks, editStock } = useStocks()
+  const { dividends, loadDividends } = useDividends()
   const [usdJpy, setUsdJpy] = useState(150)
 
   useEffect(() => {
     loadStocks()
+    loadDividends()
     getUsdJpyRate().then(setUsdJpy)
-  }, [loadStocks])
+  }, [loadStocks, loadDividends])
 
   // Fetch prices after stocks load
   useEffect(() => {
@@ -34,6 +37,18 @@ export default function DashboardPage() {
     })
   }, [stocks.length]) // eslint-disable-line react-hooks/exhaustive-deps
 
+  const annualDividendMap = useMemo(() => {
+    const map = new Map<string, number>()
+    const cutoff = new Date()
+    cutoff.setFullYear(cutoff.getFullYear() - 1)
+    for (const d of dividends) {
+      if (new Date(d.receivedDate) < cutoff) continue
+      const jpyAmount = d.currency === 'USD' ? d.amount * usdJpy : d.amount
+      map.set(d.stockId, (map.get(d.stockId) ?? 0) + jpyAmount)
+    }
+    return map
+  }, [dividends, usdJpy])
+
   const pnlList = useMemo((): StockPnL[] =>
     stocks.map((stock) => {
       const rate = stock.currency === 'USD' ? usdJpy : 1
@@ -41,8 +56,8 @@ export default function DashboardPage() {
       const costBasisJPY = stock.avgPrice * stock.shares * rate
       const pnlJPY = currentValueJPY - costBasisJPY
       const pnlPercent = costBasisJPY > 0 ? (pnlJPY / costBasisJPY) * 100 : 0
-      return { stock, currentValueJPY, costBasisJPY, pnlJPY, pnlPercent }
-    }), [stocks, usdJpy])
+      return { stock, currentValueJPY, costBasisJPY, pnlJPY, pnlPercent, annualDividendJPY: annualDividendMap.get(stock.id) }
+    }), [stocks, usdJpy, annualDividendMap])
 
   const totalValueJPY = pnlList.reduce((s, d) => s + d.currentValueJPY, 0)
   const totalCostJPY = pnlList.reduce((s, d) => s + d.costBasisJPY, 0)

@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet'
 import { useStocks } from '@/hooks/useStocks'
+import { useDividends } from '@/hooks/useDividends'
 import { fetchAllStockPrices } from '@/api/stockPrice'
 import { getUsdJpyRate } from '@/api/exchangeRate'
 import StockCard from '@/components/portfolio/StockCard'
@@ -24,6 +25,7 @@ type StockFormData = {
 
 export default function PortfolioPage() {
   const { stocks, loading, loadStocks, createStock, editStock, deleteStock } = useStocks()
+  const { dividends, loadDividends } = useDividends()
   const [usdJpy, setUsdJpy] = useState(150)
   const [sheetOpen, setSheetOpen] = useState(false)
   const [editingStock, setEditingStock] = useState<Stock | null>(null)
@@ -31,8 +33,9 @@ export default function PortfolioPage() {
 
   useEffect(() => {
     loadStocks()
+    loadDividends()
     getUsdJpyRate().then(setUsdJpy)
-  }, [loadStocks])
+  }, [loadStocks, loadDividends])
 
   // Fetch prices after stocks load
   useEffect(() => {
@@ -50,6 +53,18 @@ export default function PortfolioPage() {
     })
   }, [stocks.length]) // eslint-disable-line react-hooks/exhaustive-deps
 
+  const annualDividendMap = useMemo(() => {
+    const map = new Map<string, number>()
+    const cutoff = new Date()
+    cutoff.setFullYear(cutoff.getFullYear() - 1)
+    for (const d of dividends) {
+      if (new Date(d.receivedDate) < cutoff) continue
+      const jpyAmount = d.currency === 'USD' ? d.amount * usdJpy : d.amount
+      map.set(d.stockId, (map.get(d.stockId) ?? 0) + jpyAmount)
+    }
+    return map
+  }, [dividends, usdJpy])
+
   const pnlList = useMemo((): StockPnL[] =>
     stocks.map((stock) => {
       const rate = stock.currency === 'USD' ? usdJpy : 1
@@ -57,8 +72,8 @@ export default function PortfolioPage() {
       const costBasisJPY = stock.avgPrice * stock.shares * rate
       const pnlJPY = currentValueJPY - costBasisJPY
       const pnlPercent = costBasisJPY > 0 ? (pnlJPY / costBasisJPY) * 100 : 0
-      return { stock, currentValueJPY, costBasisJPY, pnlJPY, pnlPercent }
-    }), [stocks, usdJpy])
+      return { stock, currentValueJPY, costBasisJPY, pnlJPY, pnlPercent, annualDividendJPY: annualDividendMap.get(stock.id) }
+    }), [stocks, usdJpy, annualDividendMap])
 
   const handleOpenAdd = () => {
     setEditingStock(null)
@@ -103,6 +118,7 @@ export default function PortfolioPage() {
           <StockCard
             key={pnl.stock.id}
             pnl={pnl}
+            annualDividendJPY={pnl.annualDividendJPY}
             onEdit={handleOpenEdit}
             onDelete={deleteStock}
           />
