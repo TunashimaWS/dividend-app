@@ -12,7 +12,7 @@ import type { Stock } from '@/types'
 type ImportableStock = Omit<Stock, 'id' | 'createdAt' | 'updatedAt' | 'currentPrice'>
 
 export default function SettingsPage() {
-  const { stocks, loadStocks, createStock } = useStocks()
+  const { stocks, loadStocks, createStock, clearAllStocks } = useStocks()
 
   useEffect(() => {
     loadStocks()
@@ -42,6 +42,18 @@ export default function SettingsPage() {
               disabled={stocks.length === 0}
             >
               CSVエクスポート（{stocks.length}件）
+            </Button>
+            <Button
+              variant="destructive"
+              className="w-full h-12"
+              onClick={async () => {
+                if (confirm(`全${stocks.length}件の銘柄を削除しますか？`)) {
+                  await clearAllStocks()
+                }
+              }}
+              disabled={stocks.length === 0}
+            >
+              全銘柄を削除（{stocks.length}件）
             </Button>
           </CardContent>
         </Card>

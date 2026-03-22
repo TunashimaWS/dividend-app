@@ -52,5 +52,12 @@ export function useStocks() {
     [user, removeStock],
   )
 
-  return { stocks, loading, loadStocks, createStock, editStock, deleteStock }
+  const clearAllStocks = useCallback(async () => {
+    if (!user) return
+    const current = useStockStore.getState().stocks
+    await Promise.all(current.map((s) => deleteDocument(user.uid, 'stocks', s.id)))
+    setStocks([])
+  }, [user, setStocks])
+
+  return { stocks, loading, loadStocks, createStock, editStock, deleteStock, clearAllStocks }
 }
