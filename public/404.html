@@ -1,0 +1,14 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <script>
+      // GitHub Pages SPA redirect
+      // パス情報をsessionStorageに保存してindex.htmlへリダイレクト
+      const path = window.location.pathname;
+      sessionStorage.setItem('spa_redirect', path);
+      window.location.replace('/dividend-app/');
+    </script>
+  </head>
+  <body></body>
+</html>
