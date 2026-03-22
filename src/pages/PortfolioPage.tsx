@@ -118,7 +118,6 @@ export default function PortfolioPage() {
           <StockCard
             key={pnl.stock.id}
             pnl={pnl}
-            annualDividendJPY={pnl.annualDividendJPY}
             onEdit={handleOpenEdit}
             onDelete={deleteStock}
           />

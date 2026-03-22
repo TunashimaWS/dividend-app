@@ -20,13 +20,12 @@ const TYPE_LABELS: Record<string, string> = {
 
 interface Props {
   pnl: StockPnL
-  annualDividendJPY?: number  // 過去12ヶ月の受取配当合計（円）
   onEdit: (stock: Stock) => void
   onDelete: (id: string) => void
 }
 
-export default function StockCard({ pnl, annualDividendJPY, onEdit, onDelete }: Props) {
-  const { stock, currentValueJPY, pnlJPY, pnlPercent } = pnl
+export default function StockCard({ pnl, onEdit, onDelete }: Props) {
+  const { stock, currentValueJPY, pnlJPY, pnlPercent, annualDividendJPY } = pnl
   const priceLabel =
     stock.currency === 'USD'
       ? formatUSD(stock.currentPrice)
