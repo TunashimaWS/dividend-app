@@ -55,6 +55,9 @@ export default {
       fontFamily: {
         sans: ['Geist Variable', 'system-ui', 'sans-serif'],
       },
+      padding: {
+        'safe': 'env(safe-area-inset-bottom)',
+      },
     },
   },
   plugins: [],
