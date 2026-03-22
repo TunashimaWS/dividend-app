@@ -1,8 +1,8 @@
 // src/components/ui/SwipeToDelete.tsx
-import { useRef, useState } from 'react'
+import { useRef, useState, type ReactNode } from 'react'
 
 interface Props {
-  children: React.ReactNode
+  children: ReactNode
   onDelete: () => void
 }
 
@@ -32,7 +32,7 @@ export default function SwipeToDelete({ children, onDelete }: Props) {
   const onEnd = () => {
     isDragging.current = false
     setDragging(false)
-    if (offset <= -DELETE_THRESHOLD + 10) {
+    if (offset <= -DELETE_THRESHOLD) {
       onDelete()
       setOffset(0)
     } else if (offset < -SNAP_THRESHOLD) {
