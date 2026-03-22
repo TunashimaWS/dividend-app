@@ -67,6 +67,8 @@ export function useDividends() {
     [user, removeDividend],
   )
 
+  // NOTE: Despite the field name, forecastPerShare stores the total expected received amount (not per-share).
+  // It is calculated as: sum of past dividend amounts (or perShare * shares from Yahoo Finance).
   const upsertForecast = useCallback(
     async (data: Omit<DividendForecast, 'updatedAt'> & { id?: string }) => {
       if (!user) return

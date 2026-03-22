@@ -283,6 +283,7 @@ export default function DividendsPage() {
           </SheetHeader>
           <form onSubmit={handleSaveForecast} className="space-y-4">
             <div className="space-y-2">
+              {/* forecastPerShare stores total received amount in this app (despite the field name) */}
               <Label>予想受取額（円）</Label>
               <Input
                 type="number"
