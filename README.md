@@ -1,73 +1,59 @@
-# React + TypeScript + Vite
+# 配当金管理アプリ
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+夫婦の資産管理Webアプリ。
 
-Currently, two official plugins are available:
+## セットアップ手順
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+### 1. Firebaseプロジェクトを作成
 
-## React Compiler
+1. [Firebase Console](https://console.firebase.google.com/) でプロジェクトを作成
+2. Authentication → ログイン方法 → メール/パスワード を有効化
+3. Firestore Database を作成（本番モード）
+4. プロジェクト設定 → Webアプリを追加 → 設定値をコピー
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+### 2. Firestoreセキュリティルールを設定
 
-## Expanding the ESLint configuration
+Firestore Console の「ルール」タブに `firestore.rules` の内容を貼り付けて公開。
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+### 3. GitHubにリポジトリをプッシュ
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+git remote add origin https://github.com/[ユーザー名]/dividend-app.git
+git branch -M main
+git push -u origin main
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+### 4. GitHub Secretsを設定
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+リポジトリ → Settings → Secrets and variables → Actions → New repository secret
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+| Secret名 | 値 |
+|---------|---|
+| VITE_FIREBASE_API_KEY | Firebase APIキー |
+| VITE_FIREBASE_AUTH_DOMAIN | xxx.firebaseapp.com |
+| VITE_FIREBASE_PROJECT_ID | プロジェクトID |
+| VITE_FIREBASE_STORAGE_BUCKET | xxx.appspot.com |
+| VITE_FIREBASE_MESSAGING_SENDER_ID | 送信者ID |
+| VITE_FIREBASE_APP_ID | アプリID |
+
+### 5. GitHub Pagesを有効化
+
+リポジトリ → Settings → Pages → Source: **GitHub Actions**
+
+### 6. アクセス
+
+`https://[ユーザー名].github.io/dividend-app/` でアクセスできます。
+
+### 7. Firebaseでユーザーを作成
+
+Firebase Console → Authentication → ユーザーを追加 → メールとパスワードを設定
+
+（ご自身と奥様の2アカウント分）
+
+## 開発
+
+```bash
+npm install
+cp .env.example .env  # Firebase設定値を入力
+npm run dev
 ```
