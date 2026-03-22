@@ -10,6 +10,8 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import type { Stock, StockType, AccountType } from '@/types'
+import { fetchStockName } from '@/api/stockPrice'
+import { showToast } from '@/stores/toastStore'
 
 type StockFormData = Omit<Stock, 'id' | 'createdAt' | 'updatedAt' | 'currentPrice'>
 
@@ -44,6 +46,7 @@ export default function StockForm({ initial, onSubmit, onCancel }: Props) {
     memo: initial?.memo ?? '',
   })
   const [submitting, setSubmitting] = useState(false)
+  const [fetchingName, setFetchingName] = useState(false)
 
   const handleTypeChange = (type: StockType) => {
     setForm((f) => ({
@@ -51,6 +54,21 @@ export default function StockForm({ initial, onSubmit, onCancel }: Props) {
       type,
       currency: type === 'us_stock' ? 'USD' : 'JPY',
     }))
+  }
+
+  const handleCodeBlur = async () => {
+    // 編集モード（initial?.code が存在）のときはスキップ
+    if (initial?.code || !form.code || form.name) return
+    setFetchingName(true)
+    setForm((f) => ({ ...f, name: '取得中...' }))
+    const name = await fetchStockName(form.code, form.type)
+    if (name) {
+      setForm((f) => ({ ...f, name }))
+    } else {
+      setForm((f) => ({ ...f, name: '' }))
+      showToast('銘柄名の自動取得に失敗しました（手動で入力してください）')
+    }
+    setFetchingName(false)
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -74,6 +92,7 @@ export default function StockForm({ initial, onSubmit, onCancel }: Props) {
           required
           className="h-12"
           placeholder="例: トヨタ自動車"
+          disabled={fetchingName}
         />
       </div>
 
@@ -83,6 +102,7 @@ export default function StockForm({ initial, onSubmit, onCancel }: Props) {
           id="code"
           value={form.code}
           onChange={(e) => setForm((f) => ({ ...f, code: e.target.value.toUpperCase() }))}
+          onBlur={handleCodeBlur}
           required
           className="h-12"
           placeholder="例: 7203 / AAPL"

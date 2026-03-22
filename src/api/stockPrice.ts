@@ -8,7 +8,7 @@ interface PriceCache {
   timestamp: number
 }
 
-function toSymbol(code: string, type: StockType): string {
+export function toSymbol(code: string, type: StockType): string {
   return type === 'jp_stock' ? `${code}.T` : code
 }
 
@@ -53,4 +53,19 @@ export async function fetchAllStockPrices(
       results[i].status === 'fulfilled' ? (results[i] as PromiseFulfilledResult<number | null>).value : null,
     ]),
   )
+}
+
+export async function fetchStockName(code: string, type: StockType): Promise<string | null> {
+  const symbol = toSymbol(code, type)
+  try {
+    const yahooUrl = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(symbol)}?interval=1d&range=1d`
+    const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(yahooUrl)}`
+    const res = await fetch(proxyUrl)
+    if (!res.ok) return null
+    const data = await res.json()
+    const meta = data?.chart?.result?.[0]?.meta
+    return (meta?.shortName ?? meta?.longName ?? null) as string | null
+  } catch {
+    return null
+  }
 }
