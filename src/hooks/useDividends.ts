@@ -29,26 +29,30 @@ export function useDividends() {
   }, [user, setDividends, setForecasts])
 
   const createDividend = useCallback(
-    async (data: Omit<Dividend, 'id' | 'createdAt'>) => {
-      if (!user) return
+    async (data: Omit<Dividend, 'id' | 'createdAt'>): Promise<boolean> => {
+      if (!user) return false
       try {
         const id = await addDocument(user.uid, 'dividends', data)
         addDividend({ ...data, id, createdAt: new Date().toISOString() })
+        return true
       } catch {
         showToast('配当金の記録に失敗しました')
+        return false
       }
     },
     [user, addDividend],
   )
 
   const editDividend = useCallback(
-    async (id: string, data: Partial<Omit<Dividend, 'id' | 'createdAt'>>) => {
-      if (!user) return
+    async (id: string, data: Partial<Omit<Dividend, 'id' | 'createdAt'>>): Promise<boolean> => {
+      if (!user) return false
       try {
         await updateDocument(user.uid, 'dividends', id, data)
         updateDividend(id, data)
+        return true
       } catch {
         showToast('配当金の更新に失敗しました')
+        return false
       }
     },
     [user, updateDividend],
@@ -70,8 +74,8 @@ export function useDividends() {
   // NOTE: Despite the field name, forecastPerShare stores the total expected received amount (not per-share).
   // It is calculated as: sum of past dividend amounts (or perShare * shares from Yahoo Finance).
   const upsertForecast = useCallback(
-    async (data: Omit<DividendForecast, 'updatedAt'> & { id?: string }) => {
-      if (!user) return
+    async (data: Omit<DividendForecast, 'updatedAt'> & { id?: string }): Promise<boolean> => {
+      if (!user) return false
       try {
         if (data.id) {
           await updateDocument(user.uid, 'dividendForecast', data.id, data)
@@ -80,8 +84,10 @@ export function useDividends() {
         }
         const fcs = await fetchCollection<DividendForecast>(user.uid, 'dividendForecast')
         setForecasts(fcs)
+        return true
       } catch {
         showToast('予測の保存に失敗しました')
+        return false
       }
     },
     [user, setForecasts],

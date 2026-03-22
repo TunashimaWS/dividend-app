@@ -92,12 +92,12 @@ export default function DividendsPage() {
       amount: parseFloat(form.amount) || 0,
       currency: form.currency,
     }
-    if (editingDividend) {
-      await editDividend(editingDividend.id, data)
-    } else {
-      await createDividend(data)
+    const ok = await (editingDividend ? editDividend(editingDividend.id, data) : createDividend(data))
+    if (ok) {
+      setSheetOpen(false)
+      setEditingDividend(null)
+      setForm(emptyForm())
     }
-    setSheetOpen(false)
   }
 
   const handleEditForecast = (f: DividendForecast) => {
@@ -109,11 +109,15 @@ export default function DividendsPage() {
   const handleSaveForecast = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!editingForecast) return
-    await upsertForecast({
+    const ok = await upsertForecast({
       ...editingForecast,
       forecastPerShare: parseFloat(forecastAmount) || 0,
     })
-    setForecastSheetOpen(false)
+    if (ok) {
+      setForecastSheetOpen(false)
+      setEditingForecast(null)
+      setForecastAmount('')
+    }
   }
 
   const handleRefreshFromYahoo = async () => {
@@ -217,7 +221,7 @@ export default function DividendsPage() {
       </div>
 
       {/* 配当金追加/編集 Sheet */}
-      <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
+      <Sheet open={sheetOpen} onOpenChange={(open) => { setSheetOpen(open); if (!open) setEditingDividend(null) }}>
         <SheetContent side="bottom" className="h-auto overflow-y-auto pb-8">
           <SheetHeader className="mb-4">
             <SheetTitle>{editingDividend ? '配当金を編集' : '配当金を記録'}</SheetTitle>
@@ -276,7 +280,7 @@ export default function DividendsPage() {
       </Sheet>
 
       {/* 予測編集 Sheet */}
-      <Sheet open={forecastSheetOpen} onOpenChange={setForecastSheetOpen}>
+      <Sheet open={forecastSheetOpen} onOpenChange={(open) => { setForecastSheetOpen(open); if (!open) { setEditingForecast(null); setForecastAmount('') } }}>
         <SheetContent side="bottom" className="h-auto pb-8">
           <SheetHeader className="mb-4">
             <SheetTitle>{editingForecast?.stockName} 予測を編集</SheetTitle>

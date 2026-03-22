@@ -9,7 +9,7 @@ const MONTHS = ['1月','2月','3月','4月','5月','6月','7月','8月','9月','
 interface Props {
   dividends: Dividend[]
   forecasts: DividendForecast[]
-  stocksMap: Record<string, number>  // stockId → shares（未使用になるが後方互換のため維持）
+  stocksMap?: Record<string, number>  // stockId → shares（未使用になるが後方互換のため維持）
   onEditForecast?: (forecast: DividendForecast) => void
 }
 
@@ -29,7 +29,7 @@ export default function DividendCalendar({ dividends, forecasts, onEditForecast 
         if (received.length === 0 && expected.length === 0) return null
 
         return (
-          <Card key={i}>
+          <Card key={monthNum}>
             <CardContent className="p-3">
               <p className="font-semibold text-sm mb-2">{month}</p>
               {received.map((d) => (
@@ -42,7 +42,10 @@ export default function DividendCalendar({ dividends, forecasts, onEditForecast 
                 <div
                   key={f.id}
                   className="flex justify-between items-center text-sm py-1 cursor-pointer"
+                  role="button"
+                  tabIndex={0}
                   onClick={() => onEditForecast?.(f)}
+                  onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onEditForecast?.(f) } }}
                 >
                   <span className="text-muted-foreground">{f.stockName}</span>
                   <Badge
