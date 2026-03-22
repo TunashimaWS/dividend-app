@@ -1,3 +1,4 @@
+// src/components/dividends/DividendCalendar.tsx
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { formatJPY } from '@/lib/utils'
@@ -8,10 +9,11 @@ const MONTHS = ['1月','2月','3月','4月','5月','6月','7月','8月','9月','
 interface Props {
   dividends: Dividend[]
   forecasts: DividendForecast[]
-  stocksMap: Record<string, number> // stockId → shares
+  stocksMap: Record<string, number>  // stockId → shares（未使用になるが後方互換のため維持）
+  onEditForecast?: (forecast: DividendForecast) => void
 }
 
-export default function DividendCalendar({ dividends, forecasts, stocksMap }: Props) {
+export default function DividendCalendar({ dividends, forecasts, onEditForecast }: Props) {
   const currentYear = new Date().getFullYear()
 
   return (
@@ -36,16 +38,21 @@ export default function DividendCalendar({ dividends, forecasts, stocksMap }: Pr
                   <Badge>{formatJPY(d.amount)} 受取済</Badge>
                 </div>
               ))}
-              {expected.map((f) => {
-                const shares = stocksMap[f.stockId] ?? 0
-                const est = f.forecastPerShare * shares * 0.8 // approximate 20% tax
-                return (
-                  <div key={f.id} className="flex justify-between items-center text-sm py-1">
-                    <span>{f.stockName}</span>
-                    <Badge variant="outline">予想 {formatJPY(est)}</Badge>
-                  </div>
-                )
-              })}
+              {expected.map((f) => (
+                <div
+                  key={f.id}
+                  className="flex justify-between items-center text-sm py-1 cursor-pointer"
+                  onClick={() => onEditForecast?.(f)}
+                >
+                  <span className="text-muted-foreground">{f.stockName}</span>
+                  <Badge
+                    variant="outline"
+                    className="border-dashed text-muted-foreground"
+                  >
+                    予想 {formatJPY(f.forecastPerShare)}
+                  </Badge>
+                </div>
+              ))}
             </CardContent>
           </Card>
         )
