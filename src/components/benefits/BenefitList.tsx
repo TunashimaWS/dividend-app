@@ -21,8 +21,8 @@ export default function BenefitList({ benefits, onEdit, onDelete }: Props) {
         const monthsUntil = ((b.confirmMonth - currentMonth + 12) % 12) || 12
         const isAlert = monthsUntil <= 2
         return (
-          <SwipeToDelete onDelete={() => onDelete(b.id)}>
-            <Card key={b.id}>
+          <SwipeToDelete key={b.id} onDelete={() => onDelete(b.id)}>
+            <Card>
               <CardContent className="p-4">
                 <div className="flex justify-between items-start mb-2">
                   <p className="font-semibold">{b.stockName}</p>
