@@ -487,7 +487,7 @@ npx vitest run src/api/dividendData.test.ts
 
 Expected: 3テスト全て PASS
 
-- [ ] **Step 3: コミット**
+- [ ] **Step 4: コミット**
 
 ```bash
 git add src/api/dividendData.ts src/api/dividendData.test.ts
@@ -1633,7 +1633,7 @@ const annualDividendMap = useMemo(() => {
 }, [dividends])
 ```
 
-JSXへの変更は不要。
+JSXへの変更は不要。`tsconfig` に `noUnusedLocals: true` が設定されている場合、`annualDividendMap` が使われていない警告が出る可能性がある。その場合は `useMemo` の戻り値の型アノテーションを `const _annualDividendMap` に変更するか、変数名の前に `// eslint-disable-next-line @typescript-eslint/no-unused-vars` を追加する。
 
 - [ ] **Step 3: ビルド確認**
 
