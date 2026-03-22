@@ -13,16 +13,28 @@ interface ToastState {
   removeToast: (id: string) => void
 }
 
+// Collision-safe incrementing counter (avoids duplicate IDs on rapid calls)
+let _nextId = 0
+
+// Timer handles stored outside the store to enable clearTimeout on early dismiss
+const timers = new Map<string, ReturnType<typeof setTimeout>>()
+
 export const useToastStore = create<ToastState>((set) => ({
   toasts: [],
   showToast: (message, type = 'error') => {
-    const id = Date.now().toString()
+    const id = String(++_nextId)
     set((s) => ({ toasts: [...s.toasts, { id, message, type }] }))
-    setTimeout(() => {
+    const timer = setTimeout(() => {
       set((s) => ({ toasts: s.toasts.filter((t) => t.id !== id) }))
+      timers.delete(id)
     }, 3000)
+    timers.set(id, timer)
   },
-  removeToast: (id) => set((s) => ({ toasts: s.toasts.filter((t) => t.id !== id) })),
+  removeToast: (id) => {
+    clearTimeout(timers.get(id))
+    timers.delete(id)
+    set((s) => ({ toasts: s.toasts.filter((t) => t.id !== id) }))
+  },
 }))
 
 // React外から呼び出せるヘルパー
