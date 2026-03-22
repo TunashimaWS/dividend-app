@@ -17,9 +17,10 @@ import type { PortfolioSnapshot, StockPnL } from '@/types'
 export default function DashboardPage() {
   const { stocks, loadStocks, editStock } = useStocks()
   const { dividends, loadDividends } = useDividends()
-  const { saveSnapshot, loadSnapshots } = usePortfolioHistory()
+  const { saveSnapshot, loadSnapshots, backfillSnapshots } = usePortfolioHistory()
   const [usdJpy, setUsdJpy] = useState(150)
   const [snapshots, setSnapshots] = useState<PortfolioSnapshot[]>([])
+  const [backfilling, setBackfilling] = useState(false)
 
   useEffect(() => {
     loadStocks()
@@ -48,6 +49,14 @@ export default function DashboardPage() {
       saveSnapshot(total)
     })
   }, [stocks.length]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  const handleBackfill = async () => {
+    if (backfilling || stocks.length === 0) return
+    setBackfilling(true)
+    const result = await backfillSnapshots(stocks, usdJpy)
+    setSnapshots(result)
+    setBackfilling(false)
+  }
 
   const annualDividendMap = useMemo(() => {
     const map = new Map<string, number>()
@@ -100,8 +109,17 @@ export default function DashboardPage() {
 
         {/* 資産推移グラフ */}
         <Card>
-          <CardHeader className="pb-0">
+          <CardHeader className="pb-0 flex flex-row items-center justify-between">
             <CardTitle className="text-base">資産推移</CardTitle>
+            {stocks.length > 0 && (
+              <button
+                onClick={handleBackfill}
+                disabled={backfilling}
+                className="text-xs text-blue-400 disabled:text-muted-foreground"
+              >
+                {backfilling ? '取得中…' : '過去データを取得'}
+              </button>
+            )}
           </CardHeader>
           <CardContent className="pt-3">
             <PortfolioHistoryChart snapshots={snapshots} />
