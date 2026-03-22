@@ -210,7 +210,7 @@ export default function StockForm({ initial, onSubmit, onCancel }: Props) {
         >
           キャンセル
         </Button>
-        <Button type="submit" className="flex-1 h-12" disabled={submitting}>
+        <Button type="submit" className="flex-1 h-12" disabled={submitting || fetchingName}>
           {submitting ? '保存中...' : '保存'}
         </Button>
       </div>
