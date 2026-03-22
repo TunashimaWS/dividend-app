@@ -14,8 +14,6 @@ import DividendCalendar from '@/components/dividends/DividendCalendar'
 import BottomNav from '@/components/layout/BottomNav'
 import PageHeader from '@/components/layout/PageHeader'
 
-const MONTHS = Array.from({ length: 12 }, (_, i) => ({ value: String(i + 1), label: `${i + 1}月` }))
-
 export default function DividendsPage() {
   const { dividends, forecasts, loadDividends, createDividend, deleteDividend } = useDividends()
   const { stocks, loadStocks } = useStocks()
