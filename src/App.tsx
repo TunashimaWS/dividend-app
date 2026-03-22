@@ -7,6 +7,7 @@ import PortfolioPage from '@/pages/PortfolioPage'
 import DividendsPage from '@/pages/DividendsPage'
 import BenefitsPage from '@/pages/BenefitsPage'
 import SettingsPage from '@/pages/SettingsPage'
+import Toast from '@/components/ui/Toast'
 
 function AppRoutes() {
   useAuthInit()
@@ -61,6 +62,7 @@ function AppRoutes() {
 export default function App() {
   return (
     <BrowserRouter basename="/dividend-app">
+      <Toast />
       <AppRoutes />
     </BrowserRouter>
   )
