@@ -1,0 +1,17 @@
+{
+  "name": "配当金管理",
+  "short_name": "配当管理",
+  "description": "株式配当金・ポートフォリオ管理アプリ",
+  "start_url": "/dividend-app/",
+  "display": "standalone",
+  "background_color": "#0f172a",
+  "theme_color": "#0f172a",
+  "icons": [
+    {
+      "src": "/dividend-app/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
